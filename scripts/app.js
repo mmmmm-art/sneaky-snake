@@ -4,8 +4,7 @@ const canvas = document.getElementById("game-canvas");
 /** @type {CanvasRenderingContext2D} */ //@ts-ignore canvas is an HTMLCanvasElement
 const ctx = canvas.getContext("2d");
 canvas.width = 1400;
-canvas.height = 750;
-
+canvas.height = 740;
 
 let game = {
     gridSize: 20,
@@ -27,6 +26,40 @@ class Player {
         this.segments = [] 
         this.currentDirection = "right";
         this.lastupdate = 0;
+        this.wireUpEvents();
+    }
+
+    wireUpEvents() {
+        document.addEventListener("keydown", (e) => {
+            switch(e.code) {
+                case "ArrowUp":
+                    if(this.currentDirection != "down"){this.currentDirection = "up";}
+                break
+                case "ArrowDown":
+                    if(this.currentDirection != "up"){this.currentDirection = "down";}
+                break
+                case "ArrowRight":
+                    if(this.currentDirection != "left"){this.currentDirection = "right";}
+                break
+                case "ArrowLeft":
+                    if(this.currentDirection != "right"){this.currentDirection = "left";}
+                break
+                case "KeyW":
+                    if(this.currentDirection != "down"){this.currentDirection = "up";}
+                break
+                case "KeyS":
+                    if(this.currentDirection != "up"){this.currentDirection = "down";}
+                break
+                case "KeyD":
+                    if(this.currentDirection != "left"){this.currentDirection = "right";}
+                break
+                case "KeyA":
+                    if(this.currentDirection != "right"){this.currentDirection = "left";}
+                break
+                
+            }
+        })
+        
     }
     update(elaspedtime) {
         this.lastupdate += elaspedtime
@@ -82,7 +115,33 @@ class Segment {
     }
 }
 
+class Food {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+        this.radius = game.gridSize / 2;
+        this.color = "green";
+        this.growth = 1;
+        this.isEaten = false
+    }
+
+    update() {
+
+    }
+
+    render() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = this.color
+        ctx.arc(this.x + this.radius, this.y + this.radius, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+    }
+}
+
 let P1 = new Player(5 * game.gridSize, 5 * game.gridSize)
+let food = new Food(200,200);
 let currentTime = 0;
 
 function gameLoop(timestamp) {
@@ -92,6 +151,7 @@ function gameLoop(timestamp) {
 
     P1.update(elaspedtime);
     P1.render();
+    food.render();
 
 
     requestAnimationFrame(gameLoop);
