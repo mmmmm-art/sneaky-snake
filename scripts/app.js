@@ -4,25 +4,24 @@ const canvas = document.getElementById("game-canvas");
 /** @type {CanvasRenderingContext2D} */ //@ts-ignore canvas is an HTMLCanvasElement
 const ctx = canvas.getContext("2d");
 canvas.width = 1400;
-canvas.height = 740;
+canvas.height = 750;
 
 let game = {
-    gridSize: 20,
-    refreshRate: 250,
+    gridSize: 25,
+    refreshRate: 175,
 }
 
 class Player {
     /**
      * @param {Number} x
      * @param {Number} y
-     * @param {game} [game]
      */
-    constructor(x,y,game) {
+    constructor(x,y) {
         this.x = x;
         this.y = y;
-        this.game = game
         this.color = 0;
-        this.head = new Segment(this.x, this.y, this.color)
+        this.r = game.gridSize / 2;
+        this.head = new Segment(this.x, this.y, this.color, this.r)
         this.segments = [] 
         this.currentDirection = "right";
         this.lastupdate = 0;
@@ -62,9 +61,15 @@ class Player {
         
     }
     update(elaspedtime) {
+        // this.segments[this.segments.indexOf(s) - 1]
         this.lastupdate += elaspedtime
         if(this.lastupdate < game.refreshRate) return
-        this.lastupdate = 0
+        this.lastupdate = 0;
+        this.color += 10;
+        this.segments.forEach((s) => {
+            s.r =  this.r * ((this.segments.indexOf(s) + 1) / this.segments.length)
+        })
+        this.segments.push(new Segment(this.head.x, this.head.y, this.color, this.r))
         switch(this.currentDirection) {
             case "right":
                 this.head.x += game.gridSize;
@@ -100,10 +105,11 @@ class Segment {
      * @param {Number} y
      * @param {Number} c
      */
-     constructor(x,y,c) {
+     constructor(x,y,c,r) {
         this.x = x;
         this.y = y;
-        this.s = game.gridSize;
+        this.radius = game.gridSize / 2 ;
+        this.r = r
         this.color = c
     }
 
@@ -113,8 +119,11 @@ class Segment {
 
     render() {
         ctx.save();
+        ctx.beginPath();
         ctx.fillStyle = `hsla(${this.color}, 100%, 50%, 1)`;
-        ctx.fillRect(this.x, this.y, this.s, this.s)
+        ctx.arc(this.x + game.gridSize / 2, this.y + game.gridSize / 2, this.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
         ctx.restore();
     }
 }
@@ -147,12 +156,18 @@ class Food {
     }
 
     render() {
+
+        let alpha = (Math.PI * 2) / 10;
         ctx.save();
         ctx.beginPath();
-        ctx.fillStyle = `hsla(${this.color}, 100%, 50%, 1)`;
-        ctx.arc(this.x + this.radius, this.y + this.radius, this.radius, 0, Math.PI * 2);
-        ctx.fill();
+        for(let i = 11; i != 0; i--) {
+            let r = this.radius *(i % 2 + 1) / 2;
+            let omega = alpha * i
+            ctx.lineTo((r * Math.sin(omega)) + this.x + this.radius, (r * Math.cos(omega)) + this.y + this.radius);
+        }
         ctx.closePath();
+        ctx.fillStyle = `hsla(${this.color}, 100%, 50%, 1)`;
+        ctx.fill();
         ctx.restore();
     }
 }
