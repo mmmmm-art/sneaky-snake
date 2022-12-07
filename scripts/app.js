@@ -79,6 +79,10 @@ class Player {
                 this.head.y += game.gridSize;
                 break;
         }
+
+        if(this.head.x < 0 || this.head.y < 0 || this.head.x + game.gridSize > canvas.width || this.head.y + game.gridSize > canvas.height) {
+            //gameOver
+        }
     }
 
     render() {
@@ -116,23 +120,36 @@ class Segment {
 }
 
 class Food {
-    constructor(x, y) {
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} [type]
+     */
+    constructor(x, y, type) {
         this.x = x
         this.y = y
         this.radius = game.gridSize / 2;
-        this.color = "green";
+        this.color = 130;
         this.growth = 1;
         this.isEaten = false
+        this.type = type;
     }
 
     update() {
-
+        if(this.type === 2) {
+            this.color = 270;
+            this.growth = 2;
+        }
+        if(this.type === 3) {
+            this.color += 2;
+            this.growth = 3;
+        }
     }
 
     render() {
         ctx.save();
         ctx.beginPath();
-        ctx.fillStyle = this.color
+        ctx.fillStyle = `hsla(${this.color}, 100%, 50%, 1)`;
         ctx.arc(this.x + this.radius, this.y + this.radius, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.closePath();
@@ -141,7 +158,9 @@ class Food {
 }
 
 let P1 = new Player(5 * game.gridSize, 5 * game.gridSize)
-let food = new Food(200,200);
+let food = new Food(200,200, 3);
+let food1 = new Food(300,200, 2);
+let food2 = new Food(400,200, 1);
 let currentTime = 0;
 
 function gameLoop(timestamp) {
@@ -151,7 +170,12 @@ function gameLoop(timestamp) {
 
     P1.update(elaspedtime);
     P1.render();
+    food.update();
     food.render();
+    food1.update();
+    food1.render();
+    food2.update();
+    food2.render();
 
 
     requestAnimationFrame(gameLoop);
